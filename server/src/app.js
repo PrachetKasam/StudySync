@@ -1,4 +1,5 @@
 const express = require('express')
+const subjectRoutes = require('./routes/subjectRoutes')
 
 const app = express()
 
@@ -10,5 +11,7 @@ app.get('/api/health', (req, res) => {
         message: 'StudySync API is running',
     })
 })
+
+app.use('/api/subjects', subjectRoutes)
 
 module.exports = app
