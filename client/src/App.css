@@ -77,4 +77,289 @@
 .dashboard-card p {
   margin: 0;
   color: #64748b;
+}.page-header {
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+}
+
+.page-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.subject-card {
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.subject-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.subject-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.subject-code {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.subject-credits {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.subject-card h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.subject-card p {
+  margin: 0;
+  color: #64748b;
+}@media (max-width: 1000px) {
+  .subjects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .subjects-grid {
+    grid-template-columns: 1fr;
+  }
+
+  main {
+    padding: 20px;
+  }
+}
+.attendance-page {
+  width: 100%;
+}
+
+.attendance-summary {
+  margin-bottom: 24px;
+}
+
+.attendance-summary-card {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.attendance-summary-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.attendance-summary-card strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 36px;
+}
+
+.attendance-summary-card p {
+  margin: 0;
+  color: #64748b;
+}
+
+.attendance-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.attendance-table-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.attendance-table-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.attendance-table {
+  width: 100%;
+}
+
+.attendance-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.attendance-row:last-child {
+  border-bottom: none;
+}
+
+.attendance-heading {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.attendance-subject {
+  font-weight: 500;
+}
+
+.attendance-percentage {
+  font-weight: 600;
+}
+
+@media (max-width: 650px) {
+  .attendance-row {
+    grid-template-columns: 2fr 1fr 1fr;
+    padding: 14px 16px;
+  }
+
+  .attendance-row span:last-child {
+    grid-column: 2 / 4;
+  }
+
+  .attendance-heading span:last-child {
+    display: none;
+  }
+}.assignments-page {
+  width: 100%;
+}
+
+.assignments-summary {
+  margin-bottom: 24px;
+}
+
+.assignment-summary-card {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.assignment-summary-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.assignment-summary-card strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 36px;
+}
+
+.assignment-summary-card p {
+  margin: 0;
+  color: #64748b;
+}
+
+.assignments-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.assignment-card {
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.assignment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.assignment-card-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.assignment-subject {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.assignment-card h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.assignment-status {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.assignment-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.assignment-footer span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.assignment-footer strong {
+  font-size: 14px;
+}
+
+@media (max-width: 750px) {
+  .assignments-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  .assignment-card-content {
+    flex-direction: column;
+  }
+
+  .assignment-status {
+    align-self: flex-start;
+  }
 }
