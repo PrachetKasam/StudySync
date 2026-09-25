@@ -60,12 +60,28 @@ a {
 }
 
 .sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 10px 12px;
   border-radius: 8px;
+  color: #475569;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .sidebar-nav a:hover {
   background: #f1f5f9;
+  color: #0f172a;
+}
+.sidebar-nav a.active {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.sidebar-nav a.active {
+  background: #e0e7ff;
+  color: #3730a3;
 }
 
 main {
