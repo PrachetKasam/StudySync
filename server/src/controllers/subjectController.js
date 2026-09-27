@@ -1,6 +1,7 @@
 const {
     getSubjects,
     getSubjectById,
+    createSubject,
 } = require('../services/subjectService')
 
 const getSubjectsController = (req, res) => {
@@ -30,7 +31,27 @@ const getSubjectByIdController = (req, res) => {
     })
 }
 
+const createSubjectController = (req, res) => {
+    const { name, code } = req.body
+
+    if (!name || !code) {
+        return res.status(400).json({
+            success: false,
+            message: 'Name and code are required',
+        })
+    }
+
+    const subject = createSubject(name, code)
+
+    res.status(201).json({
+        success: true,
+        data: subject,
+        message: 'Subject created successfully',
+    })
+}
+
 module.exports = {
     getSubjectsController,
     getSubjectByIdController,
+    createSubjectController,
 }
