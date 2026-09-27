@@ -1,4 +1,7 @@
-const { getSubjects } = require('../services/subjectService')
+const {
+    getSubjects,
+    getSubjectById,
+} = require('../services/subjectService')
 
 const getSubjectsController = (req, res) => {
     const subjects = getSubjects()
@@ -9,6 +12,25 @@ const getSubjectsController = (req, res) => {
     })
 }
 
+const getSubjectByIdController = (req, res) => {
+    const id = Number(req.params.id)
+
+    const subject = getSubjectById(id)
+
+    if (!subject) {
+        return res.status(404).json({
+            success: false,
+            message: 'Subject not found',
+        })
+    }
+
+    res.status(200).json({
+        success: true,
+        data: subject,
+    })
+}
+
 module.exports = {
     getSubjectsController,
+    getSubjectByIdController,
 }

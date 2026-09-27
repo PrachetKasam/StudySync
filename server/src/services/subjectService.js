@@ -18,6 +18,13 @@ const getSubjects = () => {
     ]
 }
 
+const getSubjectById = (id) => {
+    const subjects = getSubjects()
+
+    return subjects.find((subject) => subject.id === id)
+}
+
 module.exports = {
     getSubjects,
+    getSubjectById,
 }
