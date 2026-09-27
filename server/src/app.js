@@ -1,5 +1,6 @@
 const express = require('express')
 const subjectRoutes = require('./routes/subjectRoutes')
+const errorHandler = require('./middleware/errorHandler')
 
 const app = express()
 
@@ -13,5 +14,7 @@ app.get('/api/health', (req, res) => {
 })
 
 app.use('/api/subjects', subjectRoutes)
+
+app.use(errorHandler)
 
 module.exports = app
