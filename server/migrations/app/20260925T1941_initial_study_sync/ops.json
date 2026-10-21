@@ -1,0 +1,1105 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.Assignment",
+    "label": "Create table \"Assignment\"",
+    "summary": "Creates table \"Assignment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Assignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Assignment\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Assignment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Assignment\"",
+        "sql": "CREATE TABLE \"public\".\"Assignment\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"dueDate\" timestamptz NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"priority\" text NOT NULL,\n  \"status\" text NOT NULL,\n  \"subjectId\" int4 NOT NULL,\n  \"title\" text NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Assignment\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Assignment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Attendance",
+    "label": "Create table \"Attendance\"",
+    "summary": "Creates table \"Attendance\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Attendance"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Attendance\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Attendance\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Attendance\"",
+        "sql": "CREATE TABLE \"public\".\"Attendance\" (\n  \"attended\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"subjectId\" int4 NOT NULL,\n  \"total\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Attendance\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Attendance\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Event",
+    "label": "Create table \"Event\"",
+    "summary": "Creates table \"Event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Event\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Event\"",
+        "sql": "CREATE TABLE \"public\".\"Event\" (\n  \"date\" timestamptz NOT NULL,\n  \"description\" text,\n  \"id\" SERIAL NOT NULL,\n  \"title\" text NOT NULL,\n  \"type\" text NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Event\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Notice",
+    "label": "Create table \"Notice\"",
+    "summary": "Creates table \"Notice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Notice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Notice\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Notice\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Notice\"",
+        "sql": "CREATE TABLE \"public\".\"Notice\" (\n  \"category\" text NOT NULL,\n  \"content\" text NOT NULL,\n  \"date\" timestamptz NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"title\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Notice\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Notice\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Resource",
+    "label": "Create table \"Resource\"",
+    "summary": "Creates table \"Resource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Resource\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Resource\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Resource\"",
+        "sql": "CREATE TABLE \"public\".\"Resource\" (\n  \"description\" text,\n  \"id\" SERIAL NOT NULL,\n  \"subjectId\" int4 NOT NULL,\n  \"title\" text NOT NULL,\n  \"url\" text NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Resource\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Resource\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Subject",
+    "label": "Create table \"Subject\"",
+    "summary": "Creates table \"Subject\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Subject"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Subject\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Subject\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Subject\"",
+        "sql": "CREATE TABLE \"public\".\"Subject\" (\n  \"code\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Subject\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Subject\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Timetable",
+    "label": "Create table \"Timetable\"",
+    "summary": "Creates table \"Timetable\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Timetable"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Timetable\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Timetable\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Timetable\"",
+        "sql": "CREATE TABLE \"public\".\"Timetable\" (\n  \"day\" text NOT NULL,\n  \"endTime\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"room\" text,\n  \"startTime\" text NOT NULL,\n  \"subjectId\" int4 NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Timetable\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Timetable\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.User",
+    "label": "Create table \"User\"",
+    "summary": "Creates table \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"User\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"User\"",
+        "sql": "CREATE TABLE \"public\".\"User\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"passwordHash\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"User\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Attendance.Attendance_subjectId_key",
+    "label": "Add unique constraint on \"Attendance\" (subjectId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Attendance_subjectId_key",
+        "table": "Attendance"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Attendance_subjectId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Attendance_subjectId_key",
+          "public",
+          "\"public\".\"Attendance\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Attendance_subjectId_key\"",
+        "sql": "ALTER TABLE \"public\".\"Attendance\" ADD CONSTRAINT \"Attendance_subjectId_key\" UNIQUE (\"subjectId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Attendance_subjectId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Attendance_subjectId_key",
+          "public",
+          "\"public\".\"Attendance\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.User.User_email_key",
+    "label": "Add unique constraint on \"User\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "User_email_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"User_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_email_key",
+          "public",
+          "\"public\".\"User\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"User_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD CONSTRAINT \"User_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"User_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_email_key",
+          "public",
+          "\"public\".\"User\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Assignment.Assignment_subjectId_idx_84df2a1d",
+    "label": "Create index \"Assignment_subjectId_idx_84df2a1d\" on \"Assignment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Assignment_subjectId_idx_84df2a1d",
+        "table": "Assignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Assignment_subjectId_idx_84df2a1d\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Assignment_subjectId_idx_84df2a1d\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Assignment_subjectId_idx_84df2a1d\"",
+        "sql": "CREATE INDEX \"Assignment_subjectId_idx_84df2a1d\" ON \"public\".\"Assignment\" (\"subjectId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Assignment_subjectId_idx_84df2a1d\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Assignment_subjectId_idx_84df2a1d\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Assignment.Assignment_userId_idx_a489d58a",
+    "label": "Create index \"Assignment_userId_idx_a489d58a\" on \"Assignment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Assignment_userId_idx_a489d58a",
+        "table": "Assignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Assignment_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Assignment_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Assignment_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"Assignment_userId_idx_a489d58a\" ON \"public\".\"Assignment\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Assignment_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Assignment_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Event.Event_userId_idx_a489d58a",
+    "label": "Create index \"Event_userId_idx_a489d58a\" on \"Event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Event_userId_idx_a489d58a",
+        "table": "Event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Event_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Event_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Event_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"Event_userId_idx_a489d58a\" ON \"public\".\"Event\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Event_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Event_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Resource.Resource_subjectId_idx_84df2a1d",
+    "label": "Create index \"Resource_subjectId_idx_84df2a1d\" on \"Resource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Resource_subjectId_idx_84df2a1d",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Resource_subjectId_idx_84df2a1d\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Resource_subjectId_idx_84df2a1d\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Resource_subjectId_idx_84df2a1d\"",
+        "sql": "CREATE INDEX \"Resource_subjectId_idx_84df2a1d\" ON \"public\".\"Resource\" (\"subjectId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Resource_subjectId_idx_84df2a1d\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Resource_subjectId_idx_84df2a1d\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Resource.Resource_userId_idx_a489d58a",
+    "label": "Create index \"Resource_userId_idx_a489d58a\" on \"Resource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Resource_userId_idx_a489d58a",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Resource_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Resource_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Resource_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"Resource_userId_idx_a489d58a\" ON \"public\".\"Resource\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Resource_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Resource_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Subject.Subject_userId_idx_a489d58a",
+    "label": "Create index \"Subject_userId_idx_a489d58a\" on \"Subject\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Subject_userId_idx_a489d58a",
+        "table": "Subject"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Subject_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Subject_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Subject_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"Subject_userId_idx_a489d58a\" ON \"public\".\"Subject\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Subject_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Subject_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Timetable.Timetable_subjectId_idx_84df2a1d",
+    "label": "Create index \"Timetable_subjectId_idx_84df2a1d\" on \"Timetable\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Timetable_subjectId_idx_84df2a1d",
+        "table": "Timetable"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Timetable_subjectId_idx_84df2a1d\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Timetable_subjectId_idx_84df2a1d\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Timetable_subjectId_idx_84df2a1d\"",
+        "sql": "CREATE INDEX \"Timetable_subjectId_idx_84df2a1d\" ON \"public\".\"Timetable\" (\"subjectId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Timetable_subjectId_idx_84df2a1d\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Timetable_subjectId_idx_84df2a1d\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Timetable.Timetable_userId_idx_a489d58a",
+    "label": "Create index \"Timetable_userId_idx_a489d58a\" on \"Timetable\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Timetable_userId_idx_a489d58a",
+        "table": "Timetable"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Timetable_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Timetable_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Timetable_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"Timetable_userId_idx_a489d58a\" ON \"public\".\"Timetable\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Timetable_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Timetable_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Assignment.Assignment_userId_fkey",
+    "label": "Add foreign key \"Assignment_userId_fkey\" on \"Assignment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Assignment_userId_fkey",
+        "table": "Assignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Assignment_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Assignment_userId_fkey",
+          "public",
+          "\"public\".\"Assignment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Assignment_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Assignment\"\nADD CONSTRAINT \"Assignment_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Assignment_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Assignment_userId_fkey",
+          "public",
+          "\"public\".\"Assignment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Assignment.Assignment_subjectId_fkey",
+    "label": "Add foreign key \"Assignment_subjectId_fkey\" on \"Assignment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Assignment_subjectId_fkey",
+        "table": "Assignment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Assignment_subjectId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Assignment_subjectId_fkey",
+          "public",
+          "\"public\".\"Assignment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Assignment_subjectId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Assignment\"\nADD CONSTRAINT \"Assignment_subjectId_fkey\"\nFOREIGN KEY (\"subjectId\")\nREFERENCES \"public\".\"Subject\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Assignment_subjectId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Assignment_subjectId_fkey",
+          "public",
+          "\"public\".\"Assignment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Attendance.Attendance_subjectId_fkey",
+    "label": "Add foreign key \"Attendance_subjectId_fkey\" on \"Attendance\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Attendance_subjectId_fkey",
+        "table": "Attendance"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Attendance_subjectId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Attendance_subjectId_fkey",
+          "public",
+          "\"public\".\"Attendance\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Attendance_subjectId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Attendance\"\nADD CONSTRAINT \"Attendance_subjectId_fkey\"\nFOREIGN KEY (\"subjectId\")\nREFERENCES \"public\".\"Subject\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Attendance_subjectId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Attendance_subjectId_fkey",
+          "public",
+          "\"public\".\"Attendance\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Event.Event_userId_fkey",
+    "label": "Add foreign key \"Event_userId_fkey\" on \"Event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Event_userId_fkey",
+        "table": "Event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Event_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Event_userId_fkey",
+          "public",
+          "\"public\".\"Event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Event_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Event\"\nADD CONSTRAINT \"Event_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Event_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Event_userId_fkey",
+          "public",
+          "\"public\".\"Event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Resource.Resource_userId_fkey",
+    "label": "Add foreign key \"Resource_userId_fkey\" on \"Resource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Resource_userId_fkey",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Resource_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Resource_userId_fkey",
+          "public",
+          "\"public\".\"Resource\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Resource_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Resource\"\nADD CONSTRAINT \"Resource_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Resource_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Resource_userId_fkey",
+          "public",
+          "\"public\".\"Resource\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Resource.Resource_subjectId_fkey",
+    "label": "Add foreign key \"Resource_subjectId_fkey\" on \"Resource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Resource_subjectId_fkey",
+        "table": "Resource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Resource_subjectId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Resource_subjectId_fkey",
+          "public",
+          "\"public\".\"Resource\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Resource_subjectId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Resource\"\nADD CONSTRAINT \"Resource_subjectId_fkey\"\nFOREIGN KEY (\"subjectId\")\nREFERENCES \"public\".\"Subject\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Resource_subjectId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Resource_subjectId_fkey",
+          "public",
+          "\"public\".\"Resource\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Subject.Subject_userId_fkey",
+    "label": "Add foreign key \"Subject_userId_fkey\" on \"Subject\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Subject_userId_fkey",
+        "table": "Subject"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Subject_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subject_userId_fkey",
+          "public",
+          "\"public\".\"Subject\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Subject_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Subject\"\nADD CONSTRAINT \"Subject_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Subject_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subject_userId_fkey",
+          "public",
+          "\"public\".\"Subject\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Timetable.Timetable_userId_fkey",
+    "label": "Add foreign key \"Timetable_userId_fkey\" on \"Timetable\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Timetable_userId_fkey",
+        "table": "Timetable"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Timetable_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Timetable_userId_fkey",
+          "public",
+          "\"public\".\"Timetable\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Timetable_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Timetable\"\nADD CONSTRAINT \"Timetable_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Timetable_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Timetable_userId_fkey",
+          "public",
+          "\"public\".\"Timetable\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Timetable.Timetable_subjectId_fkey",
+    "label": "Add foreign key \"Timetable_subjectId_fkey\" on \"Timetable\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Timetable_subjectId_fkey",
+        "table": "Timetable"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Timetable_subjectId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Timetable_subjectId_fkey",
+          "public",
+          "\"public\".\"Timetable\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Timetable_subjectId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Timetable\"\nADD CONSTRAINT \"Timetable_subjectId_fkey\"\nFOREIGN KEY (\"subjectId\")\nREFERENCES \"public\".\"Subject\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Timetable_subjectId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Timetable_subjectId_fkey",
+          "public",
+          "\"public\".\"Timetable\""
+        ]
+      }
+    ]
+  }
+]
