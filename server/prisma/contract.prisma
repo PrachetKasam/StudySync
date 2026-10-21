@@ -1,0 +1,95 @@
+// use prisma-8
+model User {
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String       @unique
+  passwordHash String
+  createdAt    DateTime     @default(now())
+
+  subjects     Subject[]
+  assignments  Assignment[]
+  timetable    Timetable[]
+  events       Event[]
+  resources    Resource[]
+}
+
+model Subject {
+  id          Int          @id @default(autoincrement())
+  name        String
+  code        String
+  userId      Int
+
+  user        User         @relation(fields: [userId], references: [id])
+  attendance  Attendance?
+  assignments Assignment[]
+  timetable   Timetable[]
+  resources   Resource[]
+}
+
+model Attendance {
+  id        Int     @id @default(autoincrement())
+  subjectId Int     @unique
+  attended  Int
+  total     Int
+
+  subject   Subject @relation(fields: [subjectId], references: [id])
+}
+
+model Assignment {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  subjectId   Int
+  title       String
+  description String?
+  dueDate     DateTime
+  priority    String
+  status      String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+}
+
+model Timetable {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  subjectId Int
+  day       String
+  startTime String
+  endTime   String
+  room      String?
+
+  user      User     @relation(fields: [userId], references: [id])
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String?
+  date        DateTime
+  type        String
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Notice {
+  id       Int      @id @default(autoincrement())
+  title    String
+  content  String
+  date     DateTime
+  category String
+}
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  subjectId   Int
+  title       String
+  description String?
+  url         String
+
+  user        User     @relation(fields: [userId], references: [id])
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+}
