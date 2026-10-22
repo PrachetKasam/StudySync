@@ -1,3 +1,4 @@
+require('temporal-polyfill/full/global');
 const postgres = require('@prisma/orm-postgres/runtime').default
 const { readFileSync } = require('node:fs')
 const path = require('node:path')
