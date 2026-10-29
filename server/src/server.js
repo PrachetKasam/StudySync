@@ -1,5 +1,9 @@
-﻿
 require('dotenv').config()
+
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is missing. Server cannot start.')
+  process.exit(1)
+}
 
 const app = require('./app')
 
