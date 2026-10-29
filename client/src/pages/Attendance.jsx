@@ -1,111 +1,295 @@
-const attendanceData = [
-    {
-        subject: 'Data Structures',
-        attended: 18,
-        total: 20,
-    },
-    {
-        subject: 'Database Management',
-        attended: 16,
-        total: 20,
-    },
-    {
-        subject: 'Operating Systems',
-        attended: 17,
-        total: 20,
-    },
-    {
-        subject: 'Computer Networks',
-        attended: 19,
-        total: 20,
-    },
-    {
-        subject: 'Web Development',
-        attended: 15,
-        total: 18,
-    },
-    {
-        subject: 'Software Engineering',
-        attended: 16,
-        total: 18,
-    },
-]
+import { useState, useEffect } from 'react'
+import {
+  ClipboardCheck,
+  Check,
+  X,
+  Edit2,
+  AlertTriangle,
+  CheckCircle2,
+  Sliders,
+} from 'lucide-react'
+import api from '../services/api'
+import useAttendanceThreshold from '../hooks/useAttendanceThreshold'
+import { useToast } from '../context/ToastContext'
+import Card, { CardHeader, CardBody } from '../components/common/Card'
+import Button from '../components/common/Button'
+import Badge from '../components/common/Badge'
+import Modal from '../components/common/Modal'
+import EmptyState from '../components/common/EmptyState'
+import SkeletonLoader from '../components/common/SkeletonLoader'
 
-function Attendance() {
-    const totalAttended = attendanceData.reduce(
-        (sum, subject) => sum + subject.attended,
-        0,
-    )
+export function Attendance() {
+  const [records, setRecords] = useState([])
+  const [loading, setLoading] = useState(true)
+  const { threshold, calculateAttendanceMetrics } = useAttendanceThreshold()
+  const toast = useToast()
 
-    const totalClasses = attendanceData.reduce(
-        (sum, subject) => sum + subject.total,
-        0,
-    )
+  // Edit Modal State
+  const [editingRecord, setEditingRecord] = useState(null)
+  const [editAttended, setEditAttended] = useState(0)
+  const [editTotal, setEditTotal] = useState(0)
+  const [savingEdit, setSavingEdit] = useState(false)
 
-    const overallPercentage = Math.round(
-        (totalAttended / totalClasses) * 100,
-    )
+  const fetchAttendance = async () => {
+    try {
+      setLoading(true)
+      const res = await api.get('/api/attendance')
+      if (res.success) {
+        setRecords(res.data)
+      }
+    } catch (err) {
+      toast.error('Failed to load attendance records')
+    } finally {
+      setLoading(false)
+    }
+  }
 
-    return (
-        <div className="attendance-page">
-            <div className="page-header">
-                <div>
-                    <h1>Attendance</h1>
-                    <p>Track your attendance across all subjects.</p>
-                </div>
-            </div>
+  useEffect(() => {
+    fetchAttendance()
+  }, [])
 
-            <div className="attendance-summary">
-                <div className="attendance-summary-card">
-                    <span>Overall Attendance</span>
-                    <strong>{overallPercentage}%</strong>
-                    <p>
-                        {totalAttended} of {totalClasses} classes attended
-                    </p>
-                </div>
-            </div>
+  const handleQuickLog = async (subjectId, action) => {
+    try {
+      const res = await api.patch(`/api/attendance/${subjectId}`, { action })
+      if (res.success) {
+        toast.success(action === 'attended' ? 'Marked class as attended (+1)' : 'Marked class as missed (+1 total)')
+        setRecords((prev) =>
+          prev.map((r) => (r.subjectId === subjectId ? res.data : r))
+        )
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to update attendance')
+    }
+  }
 
-            <div className="attendance-table-card">
-                <div className="attendance-table-header">
-                    <h2>Subject Attendance</h2>
-                </div>
+  const handleOpenEdit = (rec) => {
+    setEditingRecord(rec)
+    setEditAttended(rec.attended)
+    setEditTotal(rec.total)
+  }
 
-                <div className="attendance-table">
-                    <div className="attendance-row attendance-heading">
-                        <span>Subject</span>
-                        <span>Attended</span>
-                        <span>Total</span>
-                        <span>Percentage</span>
-                    </div>
+  const handleSaveEdit = async (e) => {
+    e.preventDefault()
+    if (!editingRecord) return
 
-                    {attendanceData.map((subject) => {
-                        const percentage = Math.round(
-                            (subject.attended / subject.total) * 100,
-                        )
+    const att = parseInt(editAttended, 10)
+    const tot = parseInt(editTotal, 10)
 
-                        return (
-                            <div
-                                className="attendance-row"
-                                key={subject.subject}
-                            >
-                                <span className="attendance-subject">
-                                    {subject.subject}
-                                </span>
+    if (isNaN(att) || att < 0 || isNaN(tot) || tot < 0) {
+      toast.error('Values cannot be negative')
+      return
+    }
 
-                                <span>{subject.attended}</span>
+    if (att > tot) {
+      toast.error('Attended classes cannot exceed total classes')
+      return
+    }
 
-                                <span>{subject.total}</span>
+    setSavingEdit(true)
+    try {
+      const res = await api.patch(`/api/attendance/${editingRecord.subjectId}`, {
+        attended: att,
+        total: tot,
+      })
+      if (res.success) {
+        toast.success(`Attendance updated for ${editingRecord.subjectName}`)
+        setRecords((prev) =>
+          prev.map((r) => (r.subjectId === editingRecord.subjectId ? res.data : r))
+        )
+        setEditingRecord(null)
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to save attendance')
+    } finally {
+      setSavingEdit(false)
+    }
+  }
 
-                                <span className="attendance-percentage">
-                                    {percentage}%
-                                </span>
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
+  const totalAttended = records.reduce((s, r) => s + r.attended, 0)
+  const totalClasses = records.reduce((s, r) => s + r.total, 0)
+  const overallPercentage = totalClasses > 0 ? Math.round((totalAttended / totalClasses) * 100) : 0
+  const isOverallLow = totalClasses > 0 && overallPercentage < threshold
+
+  return (
+    <div className="attendance-page">
+      <div className="page-header">
+        <div>
+          <h1>Attendance Tracking</h1>
+          <p>Monitor your attendance percentage and maintain the required {threshold}% threshold.</p>
         </div>
-    )
+      </div>
+
+      {loading ? (
+        <SkeletonLoader type="card" count={2} />
+      ) : records.length === 0 ? (
+        <Card className="p-8">
+          <EmptyState
+            icon={ClipboardCheck}
+            title="No subjects to track"
+            description="You need to add at least one subject before you can track attendance."
+            actionLabel="Add Subject"
+            onAction={() => (window.location.href = '/subjects')}
+          />
+        </Card>
+      ) : (
+        <>
+          {/* Summary Banner */}
+          <div className="attendance-summary-banner">
+            <Card className="attendance-overview-card">
+              <div className="overview-left">
+                <span className="overview-label">Overall Attendance</span>
+                <div className="overview-numbers">
+                  <strong className="overview-pct">{overallPercentage}%</strong>
+                  <Badge variant={isOverallLow ? 'danger' : 'success'} size="md">
+                    {isOverallLow ? `Below ${threshold}% Target` : `Above ${threshold}% Target`}
+                  </Badge>
+                </div>
+                <p className="overview-sub">
+                  {totalAttended} of {totalClasses} total lectures attended across all {records.length} subjects
+                </p>
+              </div>
+
+              <div className="overview-progress-bar-container">
+                <div className="progress-track">
+                  <div
+                    className={`progress-fill ${isOverallLow ? 'progress-danger' : 'progress-success'}`}
+                    style={{ width: `${Math.min(100, overallPercentage)}%` }}
+                  />
+                  <div
+                    className="threshold-marker"
+                    style={{ left: `${threshold}%` }}
+                    title={`Threshold: ${threshold}%`}
+                  >
+                    <span className="marker-label">{threshold}%</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Subject Attendance Cards */}
+          <div className="attendance-subject-cards-grid mt-6">
+            {records.map((rec) => {
+              const metrics = calculateAttendanceMetrics(rec.attended, rec.total)
+              return (
+                <Card key={rec.subjectId} className="attendance-subject-card">
+                  <div className="card-top-row">
+                    <div>
+                      <Badge variant="neutral" size="sm">
+                        {rec.subjectCode}
+                      </Badge>
+                      <h3 className="subject-heading">{rec.subjectName}</h3>
+                    </div>
+                    <div className="subject-pct-box">
+                      <span className={`pct-big ${metrics.isLow ? 'text-danger' : 'text-success'}`}>
+                        {metrics.percentage}%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="attendance-count-row">
+                    <span>
+                      Attended: <strong>{rec.attended}</strong> / {rec.total} classes
+                    </span>
+                    <button
+                      type="button"
+                      className="edit-counts-link"
+                      onClick={() => handleOpenEdit(rec)}
+                    >
+                      <Edit2 size={13} />
+                      <span>Edit</span>
+                    </button>
+                  </div>
+
+                  {/* Threshold Advice Message */}
+                  <div
+                    className={`advice-box ${metrics.isLow ? 'advice-warning' : 'advice-positive'}`}
+                  >
+                    {metrics.isLow ? (
+                      <AlertTriangle size={15} className="advice-icon" />
+                    ) : (
+                      <CheckCircle2 size={15} className="advice-icon" />
+                    )}
+                    <span className="advice-text">{metrics.advice}</span>
+                  </div>
+
+                  {/* Quick Action Logger */}
+                  <div className="attendance-logger-actions">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={Check}
+                      className="btn-log-attended"
+                      onClick={() => handleQuickLog(rec.subjectId, 'attended')}
+                    >
+                      +1 Attended
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={X}
+                      className="btn-log-missed"
+                      onClick={() => handleQuickLog(rec.subjectId, 'missed')}
+                    >
+                      +1 Missed
+                    </Button>
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Manual Count Adjustment Modal */}
+      <Modal
+        isOpen={editingRecord !== null}
+        onClose={() => setEditingRecord(null)}
+        title={`Edit Attendance - ${editingRecord?.subjectName || ''}`}
+        footer={
+          <div className="modal-actions">
+            <Button variant="secondary" onClick={() => setEditingRecord(null)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSaveEdit} loading={savingEdit}>
+              Update Attendance
+            </Button>
+          </div>
+        }
+      >
+        <form onSubmit={handleSaveEdit} className="form-vertical">
+          <div className="form-group">
+            <label htmlFor="edit-attended" className="form-label">
+              Classes Attended
+            </label>
+            <input
+              id="edit-attended"
+              type="number"
+              min="0"
+              className="form-input"
+              value={editAttended}
+              onChange={(e) => setEditAttended(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="edit-total" className="form-label">
+              Total Classes Conducted
+            </label>
+            <input
+              id="edit-total"
+              type="number"
+              min={editAttended}
+              className="form-input"
+              value={editTotal}
+              onChange={(e) => setEditTotal(e.target.value)}
+              required
+            />
+          </div>
+        </form>
+      </Modal>
+    </div>
+  )
 }
 
 export default Attendance
