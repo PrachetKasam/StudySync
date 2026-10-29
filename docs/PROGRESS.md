@@ -16,12 +16,12 @@
 3. Inspected backend architecture, Express app, Prisma 8 configuration, migration files, and utility modules.
 4. Checked local PostgreSQL service and port 5432 status:
    - Found PostgreSQL 18 running locally.
-   - Identified database credentials (`postgres:prachet`).
+   - Configured local PostgreSQL connection for studysync database.
    - Created the empty `studysync` PostgreSQL database.
    - Verified that Alok's initial migration (`20260925T1941_initial_study_sync`) is clean and ready to run with `prisma db migrate --show`.
 5. Tested running backend endpoints:
    - `GET /api/health` -> verified HTTP 200 `{ success: true, message: 'StudySync API is running' }`.
-   - `GET /api/subjects` -> verified HTTP 200 returning in-memory mock data.
+   - `GET /api/subjects` -> verified HTTP 200 returning in-memory seed subjects (`MATH101`, `PHY101`, `CS101`).
    - `POST /api/subjects` -> verified HTTP 201 returning new in-memory subject.
    - `GET /api/subjects/1` -> verified HTTP 200 returning single in-memory subject.
    - `GET /api/health/database` -> verified HTTP 500 failure due to missing `DATABASE_URL` in `server/.env`.
@@ -33,7 +33,7 @@
 ### Verification Commands & Results
 - `git log --all --graph --oneline --decorate -30`: Confirmed complete history and branch topology.
 - `cd server; node -e "<probe>"`: Confirmed health and subject endpoints respond with expected JSON contract envelopes.
-- `cd server; npx.cmd prisma db migrate --show --db postgresql://postgres:prachet@localhost:5432/studysync`: Confirmed `20260925T1941_initial_study_sync` is ready to apply cleanly.
+- `cd server; npx.cmd prisma db migrate --show --db <DATABASE_URL>`: Confirmed `20260925T1941_initial_study_sync` is ready to apply cleanly.
 
 ### Broken / Untested Areas
 - `DATABASE_URL` is missing from `server/.env`.
@@ -44,5 +44,5 @@
 
 ### Decisions Needed from User
 1. **Merge Approval:** Permission to merge `origin/frontend-features` into `finish/studysync`.
-2. **Database Migration Approval:** Permission to run `npx.cmd prisma db migrate --db postgresql://postgres:prachet@localhost:5432/studysync` to apply Alok's initial migration.
+2. **Database Migration Approval:** Permission to run `npx.cmd prisma db migrate --db <DATABASE_URL>` to apply Alok's initial migration.
 3. **Token Storage Choice:** Confirmation on storing access token in `localStorage` with `Authorization: Bearer <token>` to match `API_CONTRACT.md`.
