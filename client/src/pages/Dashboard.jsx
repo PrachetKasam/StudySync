@@ -10,6 +10,10 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
+  Calendar,
+  Sparkles,
+  MapPin,
+  TrendingUp,
 } from 'lucide-react'
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
@@ -106,18 +110,30 @@ export function Dashboard() {
 
   const isAttendanceLow = stats.totalClasses > 0 && stats.overallAttendancePercentage < threshold
 
+  const firstName = user?.name ? user.name.split(' ')[0] : 'Student'
+
   return (
     <div className="dashboard-page">
-      <div className="page-header dashboard-welcome-header">
-        <div>
-          <h1>Welcome back, {user?.name ? user.name.split(' ')[0] : 'Student'}!</h1>
-          <p>Here is what is happening with your studies today ({data?.todayDayName || 'Today'}).</p>
+      {/* Welcome Hero Banner */}
+      <div className="dashboard-hero-banner">
+        <div className="hero-content">
+          <div className="hero-greeting-tag">
+            <Sparkles size={14} className="sparkle-gold" />
+            <span>Academic Dashboard</span>
+          </div>
+          <h1 className="hero-title">
+            Welcome back, {firstName}! 👋
+          </h1>
+          <p className="hero-subtitle">
+            Here is your daily briefing for {data?.todayDayName || 'today'}. Stay organized and keep up the momentum!
+          </p>
         </div>
-        <div className="header-actions">
+        <div className="hero-actions">
           <Button
             variant="primary"
             icon={Plus}
             onClick={() => setSubjectModalOpen(true)}
+            className="hero-cta-btn"
           >
             Add Subject
           </Button>
@@ -127,22 +143,24 @@ export function Dashboard() {
       {/* Primary KPI Stats */}
       <section className="dashboard-stats-grid" aria-label="Key Performance Indicators">
         <Link to="/subjects" className="stat-card-link">
-          <Card className="stat-card">
+          <Card className="stat-card stat-card-indigo">
             <div className="stat-card-top">
               <span className="stat-label">Active Subjects</span>
               <div className="stat-icon-wrapper stat-icon-indigo" aria-hidden="true">
                 <BookOpen size={20} />
               </div>
             </div>
-            <strong className="stat-value">{stats.totalSubjects}</strong>
+            <div className="stat-main-row">
+              <strong className="stat-value">{stats.totalSubjects}</strong>
+            </div>
             <p className="stat-hint">
-              {stats.totalSubjects === 0 ? 'No subjects enrolled' : 'Enrolled this term'}
+              {stats.totalSubjects === 0 ? 'No subjects enrolled yet' : 'Courses active this term'}
             </p>
           </Card>
         </Link>
 
         <Link to="/attendance" className="stat-card-link">
-          <Card className="stat-card">
+          <Card className={`stat-card ${isAttendanceLow ? 'stat-card-danger' : 'stat-card-emerald'}`}>
             <div className="stat-card-top">
               <span className="stat-label">Overall Attendance</span>
               <div
@@ -152,11 +170,11 @@ export function Dashboard() {
                 <ClipboardCheck size={20} />
               </div>
             </div>
-            <div className="stat-value-with-badge">
+            <div className="stat-main-row stat-value-with-badge">
               <strong className="stat-value">{stats.overallAttendancePercentage}%</strong>
               {stats.totalClasses > 0 && (
                 <Badge variant={isAttendanceLow ? 'danger' : 'success'}>
-                  {isAttendanceLow ? 'Low' : 'On Track'}
+                  {isAttendanceLow ? 'Needs Attention' : 'On Track'}
                 </Badge>
               )}
             </div>
@@ -169,14 +187,14 @@ export function Dashboard() {
         </Link>
 
         <Link to="/assignments" className="stat-card-link">
-          <Card className="stat-card">
+          <Card className={`stat-card ${stats.overdueAssignmentsCount > 0 ? 'stat-card-danger' : 'stat-card-amber'}`}>
             <div className="stat-card-top">
               <span className="stat-label">Pending Assignments</span>
               <div className="stat-icon-wrapper stat-icon-amber" aria-hidden="true">
                 <ClipboardList size={20} />
               </div>
             </div>
-            <div className="stat-value-with-badge">
+            <div className="stat-main-row stat-value-with-badge">
               <strong className="stat-value">{stats.pendingAssignmentsCount}</strong>
               {stats.overdueAssignmentsCount > 0 && (
                 <Badge variant="danger">{stats.overdueAssignmentsCount} Overdue</Badge>
@@ -184,25 +202,27 @@ export function Dashboard() {
             </div>
             <p className="stat-hint">
               {stats.pendingAssignmentsCount === 0
-                ? 'All caught up!'
-                : `${stats.pendingAssignmentsCount} tasks to complete`}
+                ? 'All coursework completed!'
+                : `${stats.pendingAssignmentsCount} tasks remaining`}
             </p>
           </Card>
         </Link>
 
         <Link to="/timetable" className="stat-card-link">
-          <Card className="stat-card">
+          <Card className="stat-card stat-card-sky">
             <div className="stat-card-top">
               <span className="stat-label">Today's Schedule</span>
               <div className="stat-icon-wrapper stat-icon-sky" aria-hidden="true">
                 <CalendarDays size={20} />
               </div>
             </div>
-            <strong className="stat-value">{data?.todayClasses?.length || 0}</strong>
+            <div className="stat-main-row">
+              <strong className="stat-value">{data?.todayClasses?.length || 0}</strong>
+            </div>
             <p className="stat-hint">
               {data?.todayClasses?.length === 0
-                ? 'No classes scheduled'
-                : `Classes for ${data?.todayDayName}`}
+                ? 'No classes scheduled today'
+                : `Lectures scheduled for ${data?.todayDayName}`}
             </p>
           </Card>
         </Link>
@@ -210,11 +230,11 @@ export function Dashboard() {
 
       {/* Meaningful Empty State if zero data */}
       {stats.totalSubjects === 0 ? (
-        <Card className="mt-6 p-8">
+        <Card className="mt-6 p-8 empty-onboarding-card">
           <EmptyState
             icon={BookOpen}
             title="Start setting up your semester"
-            description="Add your enrolled subjects to begin recording attendance, scheduling classes, and tracking assignments."
+            description="Add your enrolled subjects to unlock attendance tracking, lecture schedules, and coursework management in one place."
             actionLabel="Add Your First Subject"
             onAction={() => setSubjectModalOpen(true)}
           />
@@ -224,8 +244,8 @@ export function Dashboard() {
           {/* Today's Classes */}
           <Card className="dashboard-panel">
             <CardHeader
-              title={`Today's Classes (${data?.todayDayName})`}
-              subtitle="Your classes scheduled for today"
+              title={`Today's Classes (${data?.todayDayName || 'Today'})`}
+              subtitle="Lectures and discussion sessions scheduled for today"
               action={
                 <Link to="/timetable" className="panel-action-link">
                   <span>View Timetable</span>
@@ -236,8 +256,11 @@ export function Dashboard() {
             <CardBody>
               {data?.todayClasses?.length === 0 ? (
                 <div className="dashboard-empty-panel">
-                  <CheckCircle2 size={32} className="text-muted-icon" />
-                  <p>No classes scheduled for today. Enjoy your day!</p>
+                  <div className="empty-panel-icon-circle">
+                    <CheckCircle2 size={28} className="text-muted-icon" />
+                  </div>
+                  <h4>No classes scheduled for today</h4>
+                  <p>Enjoy your free time, catch up on assignments, or review past lecture notes.</p>
                   <Link to="/timetable">
                     <Button variant="outline" size="sm">
                       Check Weekly Timetable
@@ -248,8 +271,8 @@ export function Dashboard() {
                 <div className="schedule-list">
                   {data.todayClasses.map((item) => (
                     <div key={item.id} className="schedule-item">
-                      <div className="schedule-time">
-                        <Clock size={16} />
+                      <div className="schedule-time-badge">
+                        <Clock size={14} />
                         <span>
                           {item.startTime} - {item.endTime}
                         </span>
@@ -258,7 +281,11 @@ export function Dashboard() {
                         <h4>{item.subjectName}</h4>
                         <div className="schedule-meta">
                           <span className="badge-tag">{item.subjectCode}</span>
-                          {item.room && <span className="room-tag">Room {item.room}</span>}
+                          {item.room && (
+                            <span className="room-tag">
+                              <MapPin size={11} /> Room {item.room}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -272,7 +299,7 @@ export function Dashboard() {
           <Card className="dashboard-panel">
             <CardHeader
               title="Upcoming Assignments"
-              subtitle="Tasks due soon that require your focus"
+              subtitle="Coursework and deadlines requiring your focus"
               action={
                 <Link to="/assignments" className="panel-action-link">
                   <span>All Assignments</span>
@@ -283,8 +310,11 @@ export function Dashboard() {
             <CardBody>
               {data?.upcomingAssignments?.length === 0 ? (
                 <div className="dashboard-empty-panel">
-                  <CheckCircle2 size={32} className="text-muted-icon" />
-                  <p>No pending assignments right now. You are all caught up!</p>
+                  <div className="empty-panel-icon-circle">
+                    <CheckCircle2 size={28} className="text-muted-icon" />
+                  </div>
+                  <h4>All caught up!</h4>
+                  <p>You have no pending assignments due in the immediate future.</p>
                   <Link to="/assignments">
                     <Button variant="outline" size="sm">
                       Add New Assignment
@@ -298,22 +328,38 @@ export function Dashboard() {
                       key={a.id}
                       className={`upcoming-item ${a.isOverdue ? 'item-overdue' : ''}`}
                     >
-                      <div className="upcoming-item-info">
-                        <span className="subject-chip">{a.subjectCode || a.subjectName}</span>
-                        <h4>{a.title}</h4>
-                        <p className="due-date-text">
-                          Due: {a.dueDate ? new Date(a.dueDate).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          }) : 'No date'}
-                        </p>
+                      <div className="upcoming-item-left">
+                        <div className="upcoming-item-info">
+                          <div className="upcoming-subject-row">
+                            <span className="subject-chip">{a.subjectCode || a.subjectName}</span>
+                            {a.isOverdue && <Badge variant="danger" size="sm">Overdue</Badge>}
+                            {!a.isOverdue && a.isDueSoon && <Badge variant="warning" size="sm">Due Soon</Badge>}
+                          </div>
+                          <h4>{a.title}</h4>
+                          <p className="due-date-text">
+                            <Clock size={12} />
+                            <span>
+                              Due {a.dueDate ? new Date(a.dueDate).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              }) : 'No date'}
+                            </span>
+                          </p>
+                        </div>
                       </div>
                       <div className="upcoming-item-badges">
-                        {a.isOverdue && <Badge variant="danger">Overdue</Badge>}
-                        {!a.isOverdue && a.isDueSoon && <Badge variant="warning">Due Soon</Badge>}
-                        <Badge variant={a.priority === 'High' ? 'danger' : 'neutral'}>
+                        <Badge
+                          variant={
+                            a.priority === 'High'
+                              ? 'danger'
+                              : a.priority === 'Medium'
+                              ? 'warning'
+                              : 'neutral'
+                          }
+                          size="sm"
+                        >
                           {a.priority}
                         </Badge>
                       </div>
@@ -346,7 +392,7 @@ export function Dashboard() {
           </div>
         }
       >
-        <form onSubmit={handleCreateSubject} className="subject-form">
+        <form onSubmit={handleCreateSubject} className="form-vertical">
           <div className="form-group">
             <label htmlFor="modal-sub-name" className="form-label">
               Subject Name

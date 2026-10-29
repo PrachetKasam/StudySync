@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Menu, LogOut, Sliders, ChevronDown } from 'lucide-react'
+import { Menu, LogOut, Sliders, ChevronDown, Bell, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import useAttendanceThreshold from '../hooks/useAttendanceThreshold'
 
@@ -37,12 +37,27 @@ export function Header({ onToggleSidebar, onOpenSettings }) {
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
         >
-          <Menu size={22} />
+          <Menu size={20} />
         </button>
         <span className="app-header-brand">StudySync</span>
+
+        <div className="header-status-pill">
+          <span className="status-dot-pulse" aria-hidden="true" />
+          <span className="header-status-text">Target: {threshold}% Attendance</span>
+        </div>
       </div>
 
       <div className="header-right">
+        <button
+          type="button"
+          className="header-icon-btn"
+          onClick={onOpenSettings}
+          title="Attendance Settings"
+          aria-label="Attendance Settings"
+        >
+          <Sliders size={18} />
+        </button>
+
         <div className="user-menu-container" ref={menuRef}>
           <button
             type="button"
@@ -54,8 +69,10 @@ export function Header({ onToggleSidebar, onOpenSettings }) {
             <div className="user-avatar" aria-hidden="true">
               {initials}
             </div>
-            <span className="user-name-display">{user?.name || 'Account'}</span>
-            <ChevronDown size={16} className={`chevron-icon ${menuOpen ? 'rotate' : ''}`} />
+            <div className="user-info-text">
+              <span className="user-name-display">{user?.name || 'Account'}</span>
+            </div>
+            <ChevronDown size={14} className={`chevron-icon ${menuOpen ? 'rotate' : ''}`} />
           </button>
 
           {menuOpen && (
@@ -75,7 +92,7 @@ export function Header({ onToggleSidebar, onOpenSettings }) {
                 }}
               >
                 <Sliders size={16} />
-                <span>Threshold: {threshold}%</span>
+                <span>Attendance Threshold: {threshold}%</span>
               </button>
               <button
                 type="button"

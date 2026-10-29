@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { GraduationCap, User, Mail, Lock, AlertCircle } from 'lucide-react'
+import { GraduationCap, User, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Button from '../components/common/Button'
 import { useToast } from '../context/ToastContext'
@@ -48,8 +48,8 @@ export function Register() {
     <div className="auth-page-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo" aria-hidden="true">
-            <GraduationCap size={36} />
+          <div className="auth-logo-box" aria-hidden="true">
+            <GraduationCap size={32} className="auth-logo-icon" />
           </div>
           <h1 className="auth-title">Create Account</h1>
           <p className="auth-subtitle">Join StudySync to organize your academic life</p>
@@ -103,7 +103,7 @@ export function Register() {
 
           <div className="form-group">
             <label htmlFor="reg-password" className="form-label">
-              Password (min 6 characters)
+              Password
             </label>
             <div className="input-with-icon">
               <Lock size={18} className="input-icon" aria-hidden="true" />
@@ -114,7 +114,7 @@ export function Register() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="At least 6 characters"
                 className="form-input"
               />
             </div>
@@ -133,7 +133,7 @@ export function Register() {
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Re-enter password"
                 className="form-input"
               />
             </div>
@@ -144,9 +144,10 @@ export function Register() {
             variant="primary"
             size="lg"
             loading={loading}
-            className="w-full mt-4"
+            className="w-full mt-4 auth-submit-btn"
           >
-            Create Account
+            <span>Create Account</span>
+            <ArrowRight size={16} />
           </Button>
         </form>
 

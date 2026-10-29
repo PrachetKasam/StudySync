@@ -8,6 +8,8 @@ import {
   AlertCircle,
   Trash2,
   Calendar,
+  Check,
+  RotateCcw,
 } from 'lucide-react'
 import api from '../services/api'
 import { useToast } from '../context/ToastContext'
@@ -67,8 +69,9 @@ export function Assignments() {
     return assignments.filter((a) => {
       const matchesSearch =
         a.title.toLowerCase().includes(search.toLowerCase()) ||
-        a.description.toLowerCase().includes(search.toLowerCase()) ||
-        a.subjectName.toLowerCase().includes(search.toLowerCase())
+        (a.description && a.description.toLowerCase().includes(search.toLowerCase())) ||
+        (a.subjectName && a.subjectName.toLowerCase().includes(search.toLowerCase())) ||
+        (a.subjectCode && a.subjectCode.toLowerCase().includes(search.toLowerCase()))
       const matchesStatus =
         statusFilter === 'All' ||
         (statusFilter === 'Pending' && a.status === 'Pending') ||
@@ -76,6 +79,9 @@ export function Assignments() {
       return matchesSearch && matchesStatus
     })
   }, [assignments, search, statusFilter])
+
+  const pendingCount = useMemo(() => assignments.filter((a) => a.status === 'Pending').length, [assignments])
+  const completedCount = useMemo(() => assignments.filter((a) => a.status === 'Completed').length, [assignments])
 
   const handleToggleStatus = async (assignment) => {
     const nextStatus = assignment.status === 'Completed' ? 'Pending' : 'Completed'
@@ -139,7 +145,7 @@ export function Assignments() {
       <div className="page-header">
         <div>
           <h1>Assignments</h1>
-          <p>Organize, prioritize, and track all your academic coursework.</p>
+          <p>Organize deadlines, prioritize tasks, and keep your semester coursework on track.</p>
         </div>
         <div className="header-actions">
           <Button
@@ -160,25 +166,41 @@ export function Assignments() {
           <input
             type="text"
             className="search-input"
-            placeholder="Search assignments by title or subject..."
+            placeholder="Search by title, subject, or description..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search assignments"
           />
         </div>
 
         <div className="status-tabs" role="tablist">
-          {['All', 'Pending', 'Completed'].map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === tab}
-              className={`status-tab ${statusFilter === tab ? 'active' : ''}`}
-              onClick={() => setStatusFilter(tab)}
-            >
-              {tab}
-            </button>
-          ))}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={statusFilter === 'All'}
+            className={`status-tab ${statusFilter === 'All' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('All')}
+          >
+            All <span className="tab-count-badge">{assignments.length}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={statusFilter === 'Pending'}
+            className={`status-tab ${statusFilter === 'Pending' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('Pending')}
+          >
+            Pending <span className="tab-count-badge">{pendingCount}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={statusFilter === 'Completed'}
+            className={`status-tab ${statusFilter === 'Completed' ? 'active' : ''}`}
+            onClick={() => setStatusFilter('Completed')}
+          >
+            Completed <span className="tab-count-badge">{completedCount}</span>
+          </button>
         </div>
       </div>
 
@@ -188,25 +210,31 @@ export function Assignments() {
         <Card className="p-8">
           <EmptyState
             icon={ClipboardList}
-            title={subjects.length === 0 ? 'No subjects found' : 'No assignments yet'}
+            title="No assignments recorded"
             description={
               subjects.length === 0
-                ? 'Create a subject before adding assignments.'
-                : 'Keep on top of your deadlines by creating your first assignment.'
+                ? 'Add at least one subject before creating assignments.'
+                : 'Create your first assignment to track deadlines, homework, and lab reports.'
             }
-            actionLabel={subjects.length === 0 ? 'Add Subject First' : 'Create Assignment'}
+            actionLabel={subjects.length > 0 ? 'Add Assignment' : 'Add Subject First'}
             onAction={() => {
-              if (subjects.length === 0) {
-                window.location.href = '/subjects'
-              } else {
-                setModalOpen(true)
-              }
+              if (subjects.length > 0) setModalOpen(true)
+              else window.location.href = '/subjects'
             }}
           />
         </Card>
       ) : filteredAssignments.length === 0 ? (
-        <Card className="p-6 text-center">
-          <p className="text-muted">No assignments matched your search or status filter.</p>
+        <Card className="p-8">
+          <EmptyState
+            icon={Search}
+            title="No matching assignments"
+            description={`No assignments matched "${search}" in "${statusFilter}".`}
+            actionLabel="Reset Search"
+            onAction={() => {
+              setSearch('')
+              setStatusFilter('All')
+            }}
+          />
         </Card>
       ) : (
         <div className="assignments-list-grid">
@@ -215,38 +243,49 @@ export function Assignments() {
             return (
               <Card
                 key={a.id}
-                className={`assignment-card-item ${isCompleted ? 'assignment-completed' : ''} ${a.isOverdue ? 'assignment-card-overdue' : ''}`}
+                className={`assignment-card-item priority-stripe-${a.priority.toLowerCase()} ${
+                  a.isOverdue && !isCompleted ? 'assignment-card-overdue' : ''
+                } ${isCompleted ? 'assignment-card-completed' : ''}`}
               >
-                <div className="assignment-item-header">
-                  <div className="header-tags">
-                    <Badge variant="neutral" size="sm">
-                      {a.subjectCode || a.subjectName}
-                    </Badge>
-                    <Badge
-                      variant={
-                        a.priority === 'High'
-                          ? 'danger'
-                          : a.priority === 'Medium'
-                          ? 'warning'
-                          : 'info'
-                      }
-                      size="sm"
-                    >
-                      {a.priority} Priority
-                    </Badge>
+                <div>
+                  <div className="assignment-item-header">
+                    <div className="header-tags">
+                      <Badge variant="neutral" size="sm">
+                        {a.subjectCode || a.subjectName}
+                      </Badge>
+                      <Badge
+                        variant={
+                          a.priority === 'High'
+                            ? 'danger'
+                            : a.priority === 'Medium'
+                            ? 'warning'
+                            : 'neutral'
+                        }
+                        size="sm"
+                      >
+                        {a.priority}
+                      </Badge>
+                    </div>
+                    <div className="header-alerts">
+                      {isCompleted ? (
+                        <Badge variant="success" size="sm">Completed</Badge>
+                      ) : (
+                        <>
+                          {a.isOverdue && <Badge variant="danger" size="sm">Overdue</Badge>}
+                          {!a.isOverdue && a.isDueSoon && <Badge variant="warning" size="sm">Due Soon</Badge>}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="header-alerts">
-                    {a.isOverdue && <Badge variant="danger">Overdue</Badge>}
-                    {!a.isOverdue && a.isDueSoon && <Badge variant="warning">Due Soon</Badge>}
-                  </div>
-                </div>
 
-                <div className="assignment-item-body">
                   <h3 className={`assignment-title ${isCompleted ? 'line-through' : ''}`}>
                     {a.title}
                   </h3>
+
                   {a.description && (
-                    <p className="assignment-desc">{a.description}</p>
+                    <p className={`assignment-desc ${isCompleted ? 'line-through' : ''}`}>
+                      {a.description}
+                    </p>
                   )}
                 </div>
 
@@ -254,16 +293,11 @@ export function Assignments() {
                   <div className="footer-due">
                     <Calendar size={14} />
                     <span>
-                      Due:{' '}
-                      {a.dueDate
-                        ? new Date(a.dueDate).toLocaleDateString(undefined, {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : 'No deadline'}
+                      {a.dueDate ? new Date(a.dueDate).toLocaleDateString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      }) : 'No due date'}
                     </span>
                   </div>
 
@@ -272,17 +306,29 @@ export function Assignments() {
                       type="button"
                       className={`btn-toggle-status ${isCompleted ? 'btn-completed' : 'btn-pending'}`}
                       onClick={() => handleToggleStatus(a)}
+                      title={isCompleted ? 'Mark as pending' : 'Mark as complete'}
                     >
-                      <CheckCircle2 size={16} />
-                      <span>{isCompleted ? 'Completed' : 'Mark Done'}</span>
+                      {isCompleted ? (
+                        <>
+                          <Check size={14} />
+                          <span>Done</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={14} />
+                          <span>Complete</span>
+                        </>
+                      )}
                     </button>
+
                     <button
                       type="button"
                       className="icon-action-btn danger"
                       onClick={() => setDeleteConfirmId(a.id)}
-                      aria-label="Delete assignment"
+                      aria-label={`Delete assignment ${a.title}`}
+                      title="Delete assignment"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={15} />
                     </button>
                   </div>
                 </div>
@@ -292,7 +338,7 @@ export function Assignments() {
         </div>
       )}
 
-      {/* Add Assignment Modal */}
+      {/* Create Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -310,45 +356,63 @@ export function Assignments() {
       >
         <form onSubmit={handleCreate} className="form-vertical">
           <div className="form-group">
-            <label htmlFor="ass-title" className="form-label">
+            <label htmlFor="modal-ass-title" className="form-label">
               Assignment Title
             </label>
             <input
-              id="ass-title"
+              id="modal-ass-title"
               type="text"
               required
               className="form-input"
-              placeholder="e.g. Distributed Consensus Report"
+              placeholder="e.g. Problem Set 3 or Term Paper"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="ass-subject" className="form-label">
-              Subject
-            </label>
-            <select
-              id="ass-subject"
-              required
-              className="form-select"
-              value={subjectId}
-              onChange={(e) => setSubjectId(e.target.value)}
-            >
-              {subjects.map((sub) => (
-                <option key={sub.id} value={sub.id}>
-                  {sub.code} - {sub.name}
-                </option>
-              ))}
-            </select>
+          <div className="form-row-2">
+            <div className="form-group">
+              <label htmlFor="modal-ass-subject" className="form-label">
+                Subject
+              </label>
+              <select
+                id="modal-ass-subject"
+                className="form-select"
+                value={subjectId}
+                onChange={(e) => setSubjectId(e.target.value)}
+                required
+              >
+                {subjects.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.code} — {sub.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="modal-ass-priority" className="form-label">
+                Priority
+              </label>
+              <select
+                id="modal-ass-priority"
+                className="form-select"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="ass-date" className="form-label">
+            <label htmlFor="modal-ass-due" className="form-label">
               Due Date & Time
             </label>
             <input
-              id="ass-date"
+              id="modal-ass-due"
               type="datetime-local"
               required
               className="form-input"
@@ -358,30 +422,14 @@ export function Assignments() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="ass-priority" className="form-label">
-              Priority
-            </label>
-            <select
-              id="ass-priority"
-              className="form-select"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-            >
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="ass-desc" className="form-label">
+            <label htmlFor="modal-ass-desc" className="form-label">
               Description (Optional)
             </label>
             <textarea
-              id="ass-desc"
+              id="modal-ass-desc"
               rows={3}
               className="form-textarea"
-              placeholder="Add key requirements, rubrics, or links..."
+              placeholder="Include submission portal links, chapters to read, or grading rubrics..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -393,11 +441,11 @@ export function Assignments() {
       <Modal
         isOpen={deleteConfirmId !== null}
         onClose={() => setDeleteConfirmId(null)}
-        title="Delete Assignment"
+        title="Confirm Deletion"
         footer={
           <div className="modal-actions">
             <Button variant="secondary" onClick={() => setDeleteConfirmId(null)}>
-              Keep
+              Cancel
             </Button>
             <Button variant="danger" onClick={() => handleDelete(deleteConfirmId)}>
               Delete Assignment
@@ -405,9 +453,7 @@ export function Assignments() {
           </div>
         }
       >
-        <p className="confirm-delete-text">
-          Are you sure you want to delete this assignment? This action cannot be undone.
-        </p>
+        <p>Are you sure you want to delete this assignment? This action cannot be undone.</p>
       </Modal>
     </div>
   )

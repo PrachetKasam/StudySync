@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BookOpen, Plus, Trash2, ArrowUpRight } from 'lucide-react'
+import { BookOpen, Plus, Trash2, ArrowUpRight, GraduationCap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import api from '../services/api'
 import { useToast } from '../context/ToastContext'
@@ -9,6 +9,14 @@ import Badge from '../components/common/Badge'
 import Modal from '../components/common/Modal'
 import EmptyState from '../components/common/EmptyState'
 import SkeletonLoader from '../components/common/SkeletonLoader'
+
+const CARD_ACCENT_CLASSES = [
+  'subject-accent-indigo',
+  'subject-accent-emerald',
+  'subject-accent-sky',
+  'subject-accent-purple',
+  'subject-accent-amber',
+]
 
 export function Subjects() {
   const [subjects, setSubjects] = useState([])
@@ -79,8 +87,8 @@ export function Subjects() {
     <div className="subjects-page">
       <div className="page-header">
         <div>
-          <h1>Subjects</h1>
-          <p>Manage your enrolled courses and view course details.</p>
+          <h1>Enrolled Subjects</h1>
+          <p>Manage your curriculum, catalog numbers, and course details for this semester.</p>
         </div>
         <div className="header-actions">
           <Button variant="primary" icon={Plus} onClick={() => setModalOpen(true)}>
@@ -96,41 +104,52 @@ export function Subjects() {
           <EmptyState
             icon={BookOpen}
             title="No subjects added yet"
-            description="Add your first subject to unlock attendance tracking, timetable scheduling, and assignment management."
+            description="Add your first enrolled subject to unlock attendance logging, timetable schedule grids, and assignment management."
             actionLabel="Add Subject"
             onAction={() => setModalOpen(true)}
           />
         </Card>
       ) : (
         <div className="subjects-grid">
-          {subjects.map((sub) => (
-            <Card key={sub.id} className="subject-card">
-              <div className="subject-card-header">
-                <Badge variant="neutral" size="sm">
-                  {sub.code}
-                </Badge>
-                <div className="subject-card-actions">
-                  <button
-                    type="button"
-                    className="icon-action-btn danger"
-                    onClick={() => setDeleteConfirmId(sub.id)}
-                    aria-label={`Delete ${sub.name}`}
-                  >
-                    <Trash2 size={16} />
-                  </button>
+          {subjects.map((sub, index) => {
+            const accentClass = CARD_ACCENT_CLASSES[index % CARD_ACCENT_CLASSES.length]
+            return (
+              <Card key={sub.id} className={`subject-card ${accentClass}`}>
+                <div>
+                  <div className="subject-card-header">
+                    <div className="subject-badge-group">
+                      <div className="subject-icon-avatar" aria-hidden="true">
+                        <BookOpen size={16} />
+                      </div>
+                      <Badge variant="neutral" size="sm">
+                        {sub.code}
+                      </Badge>
+                    </div>
+                    <div className="subject-card-actions">
+                      <button
+                        type="button"
+                        className="icon-action-btn danger"
+                        onClick={() => setDeleteConfirmId(sub.id)}
+                        aria-label={`Delete ${sub.name}`}
+                        title="Delete course"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <h2 className="subject-name">{sub.name}</h2>
                 </div>
-              </div>
 
-              <h2 className="subject-name">{sub.name}</h2>
-
-              <div className="subject-card-footer">
-                <Link to={`/attendance`} className="subject-link">
-                  <span>Track Attendance</span>
-                  <ArrowUpRight size={14} />
-                </Link>
-              </div>
-            </Card>
-          ))}
+                <div className="subject-card-footer">
+                  <Link to="/attendance" className="subject-link">
+                    <span>Track Attendance</span>
+                    <ArrowUpRight size={15} />
+                  </Link>
+                </div>
+              </Card>
+            )
+          })}
         </div>
       )}
 
@@ -145,36 +164,37 @@ export function Subjects() {
               Cancel
             </Button>
             <Button variant="primary" onClick={handleCreate} loading={saving}>
-              Save Subject
+              Add Subject
             </Button>
           </div>
         }
       >
         <form onSubmit={handleCreate} className="form-vertical">
           <div className="form-group">
-            <label htmlFor="sub-name" className="form-label">
+            <label htmlFor="modal-name" className="form-label">
               Subject Name
             </label>
             <input
-              id="sub-name"
+              id="modal-name"
               type="text"
               required
               className="form-input"
-              placeholder="e.g. Operating Systems"
+              placeholder="e.g. Distributed Systems"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+
           <div className="form-group">
-            <label htmlFor="sub-code" className="form-label">
+            <label htmlFor="modal-code" className="form-label">
               Subject Code
             </label>
             <input
-              id="sub-code"
+              id="modal-code"
               type="text"
               required
               className="form-input"
-              placeholder="e.g. CS203"
+              placeholder="e.g. CS401"
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
@@ -186,23 +206,21 @@ export function Subjects() {
       <Modal
         isOpen={deleteConfirmId !== null}
         onClose={() => setDeleteConfirmId(null)}
-        title="Delete Subject"
+        title="Confirm Subject Deletion"
         footer={
           <div className="modal-actions">
             <Button variant="secondary" onClick={() => setDeleteConfirmId(null)}>
-              Keep Subject
+              Cancel
             </Button>
-            <Button
-              variant="danger"
-              onClick={() => handleDelete(deleteConfirmId)}
-            >
-              Confirm Delete
+            <Button variant="danger" onClick={() => handleDelete(deleteConfirmId)}>
+              Delete Subject
             </Button>
           </div>
         }
       >
-        <p className="confirm-delete-text">
-          Are you sure you want to delete this subject? This will also remove its associated attendance record, assignments, and timetable slots.
+        <p>
+          Are you sure you want to delete this subject? Its associated attendance records,
+          assignments, and timetable slots will also be removed.
         </p>
       </Modal>
     </div>

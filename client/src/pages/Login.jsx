@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { GraduationCap, Mail, Lock, AlertCircle } from 'lucide-react'
+import { GraduationCap, Mail, Lock, AlertCircle, Sparkles, ArrowRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Button from '../components/common/Button'
 import { useToast } from '../context/ToastContext'
@@ -34,15 +34,20 @@ export function Login() {
     }
   }
 
+  const fillDemoAccount = () => {
+    setEmail('prachet@example.com')
+    setPassword('Password123!')
+  }
+
   return (
     <div className="auth-page-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="auth-logo" aria-hidden="true">
-            <GraduationCap size={36} />
+          <div className="auth-logo-box" aria-hidden="true">
+            <GraduationCap size={32} className="auth-logo-icon" />
           </div>
           <h1 className="auth-title">Welcome back</h1>
-          <p className="auth-subtitle">Sign in to your StudySync student account</p>
+          <p className="auth-subtitle">Sign in to your StudySync student dashboard</p>
         </div>
 
         {error && (
@@ -96,17 +101,25 @@ export function Login() {
             variant="primary"
             size="lg"
             loading={loading}
-            className="w-full mt-4"
+            className="w-full mt-4 auth-submit-btn"
           >
-            Sign In
+            <span>Sign in to StudySync</span>
+            <ArrowRight size={16} />
           </Button>
         </form>
 
+        <div className="auth-demo-hint">
+          <button type="button" className="demo-fill-btn" onClick={fillDemoAccount}>
+            <Sparkles size={13} />
+            <span>Click to fill demo account credentials</span>
+          </button>
+        </div>
+
         <div className="auth-footer">
           <p>
-            Don't have an account?{' '}
+            Do not have an account yet?{' '}
             <Link to="/register" className="auth-link">
-              Create one now
+              Create an account
             </Link>
           </p>
         </div>

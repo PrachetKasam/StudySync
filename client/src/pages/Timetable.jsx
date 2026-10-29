@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CalendarDays, Plus, Clock, MapPin, Trash2 } from 'lucide-react'
+import { CalendarDays, Plus, Clock, MapPin, Trash2, Calendar } from 'lucide-react'
 import api from '../services/api'
 import { useToast } from '../context/ToastContext'
 import Card from '../components/common/Card'
@@ -15,12 +15,15 @@ export function Timetable() {
   const [slots, setSlots] = useState([])
   const [subjects, setSubjects] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedMobileDay, setSelectedMobileDay] = useState('Monday')
+  
+  const todayDayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()]
+  const defaultDay = DAYS.includes(todayDayName) ? todayDayName : 'Monday'
+  const [selectedMobileDay, setSelectedMobileDay] = useState(defaultDay)
 
   // Create Modal
   const [modalOpen, setModalOpen] = useState(false)
   const [subjectId, setSubjectId] = useState('')
-  const [day, setDay] = useState('Monday')
+  const [day, setDay] = useState(defaultDay)
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('10:30')
   const [room, setRoom] = useState('')
@@ -99,7 +102,9 @@ export function Timetable() {
 
   // Group slots by day
   const slotsByDay = DAYS.reduce((acc, d) => {
-    acc[d] = slots.filter((s) => s.day === d)
+    acc[d] = slots
+      .filter((s) => s.day === d)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))
     return acc
   }, {})
 
@@ -108,7 +113,7 @@ export function Timetable() {
       <div className="page-header">
         <div>
           <h1>Weekly Timetable</h1>
-          <p>Organize your lecture hours, discussion labs, and classrooms.</p>
+          <p>Organize your weekly course schedule, lecture halls, and discussion sections.</p>
         </div>
         <div className="header-actions">
           <Button
@@ -124,140 +129,163 @@ export function Timetable() {
 
       {loading ? (
         <SkeletonLoader type="card" count={3} />
+      ) : subjects.length === 0 ? (
+        <Card className="p-8">
+          <EmptyState
+            icon={CalendarDays}
+            title="No subjects available"
+            description="Add your enrolled subjects first before configuring your weekly class timetable."
+            actionLabel="Add Subject First"
+            onAction={() => (window.location.href = '/subjects')}
+          />
+        </Card>
       ) : slots.length === 0 ? (
         <Card className="p-8">
           <EmptyState
             icon={CalendarDays}
-            title={subjects.length === 0 ? 'No subjects found' : 'Timetable is empty'}
-            description={
-              subjects.length === 0
-                ? 'Create a subject before scheduling your timetable.'
-                : 'Schedule your recurring weekly classes and lab sessions.'
-            }
-            actionLabel={subjects.length === 0 ? 'Add Subject First' : 'Add First Class'}
-            onAction={() => {
-              if (subjects.length === 0) {
-                window.location.href = '/subjects'
-              } else {
-                setModalOpen(true)
-              }
-            }}
+            title="Weekly timetable is empty"
+            description="Add your lecture periods and discussion lab hours to create your weekly calendar grid."
+            actionLabel="Add First Class Slot"
+            onAction={() => setModalOpen(true)}
           />
         </Card>
       ) : (
         <>
-          {/* Mobile Day Selector (Visible <768px) */}
-          <div className="timetable-mobile-tabs" role="tablist">
-            {DAYS.map((d) => (
-              <button
-                key={d}
-                type="button"
-                role="tab"
-                aria-selected={selectedMobileDay === d}
-                className={`mobile-day-tab ${selectedMobileDay === d ? 'active' : ''}`}
-                onClick={() => setSelectedMobileDay(d)}
-              >
-                <span>{d.slice(0, 3)}</span>
-                <span className="count-dot">
-                  {slotsByDay[d]?.length || 0}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Desktop Weekly Grid (>=768px) */}
+          {/* Desktop 6-Column Weekly Grid */}
           <div className="timetable-grid-desktop">
-            {DAYS.map((d) => (
-              <div key={d} className="day-column">
-                <div className="day-column-header">
-                  <h3>{d}</h3>
-                  <span className="day-count-badge">
-                    {slotsByDay[d]?.length || 0} classes
-                  </span>
-                </div>
-
-                <div className="day-slots-list">
-                  {slotsByDay[d]?.length === 0 ? (
-                    <div className="day-empty-cell">
-                      <span>No classes</span>
+            {DAYS.map((dayName) => {
+              const daySlots = slotsByDay[dayName] || []
+              const isToday = dayName === todayDayName
+              return (
+                <div key={dayName} className={`day-column ${isToday ? 'day-column-today' : ''}`}>
+                  <div className="day-column-header">
+                    <div className="day-header-top">
+                      <h3>{dayName}</h3>
+                      {isToday && <span className="today-chip">Today</span>}
                     </div>
-                  ) : (
-                    slotsByDay[d].map((slot) => (
-                      <div key={slot.id} className="slot-card">
-                        <div className="slot-card-top">
-                          <span className="slot-subject-code">{slot.subjectCode}</span>
-                          <button
-                            type="button"
-                            className="slot-delete-btn"
-                            onClick={() => setDeleteId(slot.id)}
-                            aria-label="Remove slot"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                        <h4 className="slot-subject-name">{slot.subjectName}</h4>
-                        <div className="slot-time-row">
-                          <Clock size={12} />
-                          <span>
-                            {slot.startTime} - {slot.endTime}
-                          </span>
-                        </div>
-                        {slot.room && (
-                          <div className="slot-room-row">
-                            <MapPin size={12} />
-                            <span>Room {slot.room}</span>
-                          </div>
-                        )}
+                    <span className="day-count-badge">
+                      {daySlots.length} {daySlots.length === 1 ? 'class' : 'classes'}
+                    </span>
+                  </div>
+
+                  <div className="day-slots-list">
+                    {daySlots.length === 0 ? (
+                      <div className="day-empty-cell">
+                        <span>No classes</span>
                       </div>
-                    ))
-                  )}
+                    ) : (
+                      daySlots.map((slot) => (
+                        <div key={slot.id} className="slot-card">
+                          <div className="slot-card-top">
+                            <span className="slot-subject-code">{slot.subjectCode}</span>
+                            <button
+                              type="button"
+                              className="slot-delete-btn"
+                              onClick={() => setDeleteId(slot.id)}
+                              aria-label={`Remove slot for ${slot.subjectName}`}
+                              title="Remove slot"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                          <span className="slot-subject-name">{slot.subjectName}</span>
+                          <div className="slot-time-row">
+                            <Clock size={11} />
+                            <span>
+                              {slot.startTime} - {slot.endTime}
+                            </span>
+                          </div>
+                          {slot.room && (
+                            <div className="slot-room-row">
+                              <MapPin size={11} />
+                              <span>Room {slot.room}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
-          {/* Mobile Day View (<768px) */}
-          <div className="timetable-mobile-view">
-            <div className="mobile-day-header">
-              <h3>{selectedMobileDay}'s Schedule</h3>
+          {/* Mobile Tabs & List View */}
+          <div className="timetable-mobile-wrapper">
+            <div className="timetable-mobile-tabs" role="tablist">
+              {DAYS.map((dayName) => {
+                const count = slotsByDay[dayName]?.length || 0
+                const isSelected = selectedMobileDay === dayName
+                const isToday = dayName === todayDayName
+                return (
+                  <button
+                    key={dayName}
+                    type="button"
+                    role="tab"
+                    aria-selected={isSelected}
+                    className={`mobile-day-tab ${isSelected ? 'active' : ''} ${isToday ? 'is-today-tab' : ''}`}
+                    onClick={() => setSelectedMobileDay(dayName)}
+                  >
+                    <span>{dayName.slice(0, 3)}</span>
+                    <span className="count-dot">{count}</span>
+                  </button>
+                )
+              })}
             </div>
-            {slotsByDay[selectedMobileDay]?.length === 0 ? (
-              <Card className="p-6 text-center">
-                <p className="text-muted">No classes scheduled for {selectedMobileDay}.</p>
-              </Card>
-            ) : (
+
+            <div className="timetable-mobile-view">
               <div className="mobile-slots-list">
-                {slotsByDay[selectedMobileDay].map((slot) => (
-                  <Card key={slot.id} className="mobile-slot-card">
-                    <div className="mobile-slot-info">
-                      <div className="header-tags">
-                        <Badge variant="neutral" size="sm">
-                          {slot.subjectCode}
-                        </Badge>
-                        {slot.room && (
-                          <span className="room-tag">Room {slot.room}</span>
-                        )}
-                      </div>
-                      <h4>{slot.subjectName}</h4>
-                      <div className="slot-time-row">
-                        <Clock size={14} />
-                        <span>
-                          {slot.startTime} - {slot.endTime}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="icon-action-btn danger"
-                      onClick={() => setDeleteId(slot.id)}
-                      aria-label="Delete class"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                {slotsByDay[selectedMobileDay]?.length === 0 ? (
+                  <Card className="p-8">
+                    <EmptyState
+                      icon={Calendar}
+                      title={`No classes on ${selectedMobileDay}`}
+                      description="You have no lectures or labs scheduled for this day."
+                      actionLabel="Add Class Slot"
+                      onAction={() => {
+                        setDay(selectedMobileDay)
+                        setModalOpen(true)
+                      }}
+                    />
                   </Card>
-                ))}
+                ) : (
+                  slotsByDay[selectedMobileDay]?.map((slot) => (
+                    <Card key={slot.id} className="mobile-slot-card">
+                      <div>
+                        <div className="slot-card-top">
+                          <Badge variant="neutral" size="sm">
+                            {slot.subjectCode}
+                          </Badge>
+                        </div>
+                        <h3 className="mobile-slot-title">{slot.subjectName}</h3>
+                        <div className="mobile-slot-meta">
+                          <div className="slot-time-row">
+                            <Clock size={13} />
+                            <span>
+                              {slot.startTime} - {slot.endTime}
+                            </span>
+                          </div>
+                          {slot.room && (
+                            <div className="slot-room-row">
+                              <MapPin size={13} />
+                              <span>Room {slot.room}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="icon-action-btn danger"
+                        onClick={() => setDeleteId(slot.id)}
+                        aria-label={`Remove slot for ${slot.subjectName}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </Card>
+                  ))
+                )}
               </div>
-            )}
+            </div>
           </div>
         </>
       )}
@@ -273,41 +301,41 @@ export function Timetable() {
               Cancel
             </Button>
             <Button variant="primary" onClick={handleCreate} loading={saving}>
-              Save Class Slot
+              Add Class
             </Button>
           </div>
         }
       >
         <form onSubmit={handleCreate} className="form-vertical">
           <div className="form-group">
-            <label htmlFor="slot-sub" className="form-label">
+            <label htmlFor="modal-time-subject" className="form-label">
               Subject
             </label>
             <select
-              id="slot-sub"
-              required
+              id="modal-time-subject"
               className="form-select"
               value={subjectId}
               onChange={(e) => setSubjectId(e.target.value)}
+              required
             >
-              {subjects.map((sub) => (
-                <option key={sub.id} value={sub.id}>
-                  {sub.code} - {sub.name}
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.code} — {s.name}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="slot-day" className="form-label">
+            <label htmlFor="modal-time-day" className="form-label">
               Day of Week
             </label>
             <select
-              id="slot-day"
-              required
+              id="modal-time-day"
               className="form-select"
               value={day}
               onChange={(e) => setDay(e.target.value)}
+              required
             >
               {DAYS.map((d) => (
                 <option key={d} value={d}>
@@ -319,43 +347,43 @@ export function Timetable() {
 
           <div className="form-row-2">
             <div className="form-group">
-              <label htmlFor="slot-start" className="form-label">
+              <label htmlFor="modal-time-start" className="form-label">
                 Start Time
               </label>
               <input
-                id="slot-start"
+                id="modal-time-start"
                 type="time"
-                required
                 className="form-input"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
+                required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="slot-end" className="form-label">
+              <label htmlFor="modal-time-end" className="form-label">
                 End Time
               </label>
               <input
-                id="slot-end"
+                id="modal-time-end"
                 type="time"
-                required
                 className="form-input"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
+                required
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="slot-room" className="form-label">
-              Room / Lab Location (Optional)
+            <label htmlFor="modal-time-room" className="form-label">
+              Room / Hall (Optional)
             </label>
             <input
-              id="slot-room"
+              id="modal-time-room"
               type="text"
               className="form-input"
-              placeholder="e.g. Hall 302, CS Lab B"
+              placeholder="e.g. Hall 302, Lab B"
               value={room}
               onChange={(e) => setRoom(e.target.value)}
             />
@@ -371,17 +399,15 @@ export function Timetable() {
         footer={
           <div className="modal-actions">
             <Button variant="secondary" onClick={() => setDeleteId(null)}>
-              Keep
+              Cancel
             </Button>
             <Button variant="danger" onClick={() => handleDelete(deleteId)}>
-              Remove
+              Remove Slot
             </Button>
           </div>
         }
       >
-        <p className="confirm-delete-text">
-          Are you sure you want to remove this scheduled class slot from your timetable?
-        </p>
+        <p>Are you sure you want to remove this class slot from your weekly timetable?</p>
       </Modal>
     </div>
   )

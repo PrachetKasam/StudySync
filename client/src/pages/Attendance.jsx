@@ -7,6 +7,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   Sliders,
+  TrendingUp,
+  Percent,
 } from 'lucide-react'
 import api from '../services/api'
 import useAttendanceThreshold from '../hooks/useAttendanceThreshold'
@@ -52,7 +54,11 @@ export function Attendance() {
     try {
       const res = await api.patch(`/api/attendance/${subjectId}`, { action })
       if (res.success) {
-        toast.success(action === 'attended' ? 'Marked class as attended (+1)' : 'Marked class as missed (+1 total)')
+        toast.success(
+          action === 'attended'
+            ? 'Marked class as attended (+1)'
+            : 'Marked class as missed (+1 total)'
+        )
         setRecords((prev) =>
           prev.map((r) => (r.subjectId === subjectId ? res.data : r))
         )
@@ -115,7 +121,7 @@ export function Attendance() {
       <div className="page-header">
         <div>
           <h1>Attendance Tracking</h1>
-          <p>Monitor your attendance percentage and maintain the required {threshold}% threshold.</p>
+          <p>Monitor your subject-wise lecture attendance and maintain your {threshold}% target requirement.</p>
         </div>
       </div>
 
@@ -126,58 +132,89 @@ export function Attendance() {
           <EmptyState
             icon={ClipboardCheck}
             title="No subjects to track"
-            description="You need to add at least one subject before you can track attendance."
+            description="You need to enroll in at least one subject before you can track attendance."
             actionLabel="Add Subject"
             onAction={() => (window.location.href = '/subjects')}
           />
         </Card>
       ) : (
         <>
-          {/* Summary Banner */}
-          <div className="attendance-summary-banner">
-            <Card className="attendance-overview-card">
+          {/* Summary Hero Card */}
+          <Card className="attendance-overview-hero-card">
+            <div className="overview-hero-main">
               <div className="overview-left">
-                <span className="overview-label">Overall Attendance</span>
+                <span className="overview-kpi-label">Cumulative Academic Attendance</span>
                 <div className="overview-numbers">
-                  <strong className="overview-pct">{overallPercentage}%</strong>
-                  <Badge variant={isOverallLow ? 'danger' : 'success'} size="md">
-                    {isOverallLow ? `Below ${threshold}% Target` : `Above ${threshold}% Target`}
-                  </Badge>
+                  <strong className={`overview-pct ${isOverallLow ? 'text-danger' : 'text-success'}`}>
+                    {overallPercentage}%
+                  </strong>
+                  <div className="overview-badge-wrapper">
+                    <Badge variant={isOverallLow ? 'danger' : 'success'} size="md">
+                      {isOverallLow ? `Below ${threshold}% Requirement` : `Above ${threshold}% Requirement`}
+                    </Badge>
+                  </div>
                 </div>
                 <p className="overview-sub">
-                  {totalAttended} of {totalClasses} total lectures attended across all {records.length} subjects
+                  <strong>{totalAttended}</strong> attended out of <strong>{totalClasses}</strong> conducted lectures across all {records.length} courses
                 </p>
               </div>
 
-              <div className="overview-progress-bar-container">
+              <div className="overview-mini-stat-boxes">
+                <div className="mini-stat-box">
+                  <span className="mini-stat-title">Target Threshold</span>
+                  <strong className="mini-stat-val">{threshold}%</strong>
+                </div>
+                <div className="mini-stat-box">
+                  <span className="mini-stat-title">Active Courses</span>
+                  <strong className="mini-stat-val">{records.length}</strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Interactive Progress Bar */}
+            <div className="overview-progress-bar-container">
+              <div className="progress-track-wrapper">
                 <div className="progress-track">
                   <div
                     className={`progress-fill ${isOverallLow ? 'progress-danger' : 'progress-success'}`}
-                    style={{ width: `${Math.min(100, overallPercentage)}%` }}
+                    style={{ width: `${Math.min(100, Math.max(0, overallPercentage))}%` }}
                   />
                   <div
                     className="threshold-marker"
                     style={{ left: `${threshold}%` }}
-                    title={`Threshold: ${threshold}%`}
+                    title={`Required Threshold: ${threshold}%`}
                   >
-                    <span className="marker-label">{threshold}%</span>
+                    <span className="marker-label">Target: {threshold}%</span>
                   </div>
                 </div>
               </div>
-            </Card>
-          </div>
+              <div className="progress-labels-row">
+                <span>0%</span>
+                <span className="target-center-hint">Requirement line at {threshold}%</span>
+                <span>100%</span>
+              </div>
+            </div>
+          </Card>
 
           {/* Subject Attendance Cards */}
           <div className="attendance-subject-cards-grid mt-6">
             {records.map((rec) => {
               const metrics = calculateAttendanceMetrics(rec.attended, rec.total)
               return (
-                <Card key={rec.subjectId} className="attendance-subject-card">
+                <Card
+                  key={rec.subjectId}
+                  className={`attendance-subject-card ${metrics.isLow ? 'card-low-attendance' : 'card-on-track'}`}
+                >
                   <div className="card-top-row">
                     <div>
-                      <Badge variant="neutral" size="sm">
-                        {rec.subjectCode}
-                      </Badge>
+                      <div className="subject-meta-pill-row">
+                        <Badge variant="neutral" size="sm">
+                          {rec.subjectCode}
+                        </Badge>
+                        <Badge variant={metrics.isLow ? 'danger' : 'success'} size="sm">
+                          {metrics.isLow ? 'Low Attendance' : 'Good Standing'}
+                        </Badge>
+                      </div>
                       <h3 className="subject-heading">{rec.subjectName}</h3>
                     </div>
                     <div className="subject-pct-box">
@@ -187,8 +224,16 @@ export function Attendance() {
                     </div>
                   </div>
 
+                  {/* Micro Progress Bar */}
+                  <div className="subject-micro-bar">
+                    <div
+                      className={`micro-fill ${metrics.isLow ? 'micro-danger' : 'micro-success'}`}
+                      style={{ width: `${Math.min(100, metrics.percentage)}%` }}
+                    />
+                  </div>
+
                   <div className="attendance-count-row">
-                    <span>
+                    <span className="attendance-tally-text">
                       Attended: <strong>{rec.attended}</strong> / {rec.total} classes
                     </span>
                     <button
@@ -197,7 +242,7 @@ export function Attendance() {
                       onClick={() => handleOpenEdit(rec)}
                     >
                       <Edit2 size={13} />
-                      <span>Edit</span>
+                      <span>Edit counts</span>
                     </button>
                   </div>
 
@@ -206,9 +251,9 @@ export function Attendance() {
                     className={`advice-box ${metrics.isLow ? 'advice-warning' : 'advice-positive'}`}
                   >
                     {metrics.isLow ? (
-                      <AlertTriangle size={15} className="advice-icon" />
+                      <AlertTriangle size={16} className="advice-icon" />
                     ) : (
-                      <CheckCircle2 size={15} className="advice-icon" />
+                      <CheckCircle2 size={16} className="advice-icon" />
                     )}
                     <span className="advice-text">{metrics.advice}</span>
                   </div>
