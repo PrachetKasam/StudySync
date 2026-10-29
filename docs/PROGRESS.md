@@ -6,43 +6,67 @@
 ---
 
 ## Phase 0 — Audit (Read-Only) [COMPLETED]
+- Inspected repository history and teammate authorship.
+- Created `finish/studysync` working branch.
+- Documented findings in `docs/STATUS.md`.
+- Obtained user approval for merge, migration, token storage strategy, and threshold persistence.
 
-### What Was Done
-1. Checked repository status, branch graph, and author history:
-   - Git log and branch analysis revealed Prachet Kasam, Alok Ranjan, and Sunidhi Jain as contributors.
-   - Discovered that Sunidhi's frontend feature work was committed on `origin/frontend-features` (`f0b7de3` through `faca1e5`) and was not yet merged into `integration/database-auth`.
-   - Identified uncommitted changes in `server/package.json` and `server/package-lock.json` pinning Prisma RC versions.
-2. Created working local branch `finish/studysync` from current `integration/database-auth` without discarding any teammate work.
-3. Inspected backend architecture, Express app, Prisma 8 configuration, migration files, and utility modules.
-4. Checked local PostgreSQL service and port 5432 status:
-   - Found PostgreSQL 18 running locally.
-   - Configured local PostgreSQL connection for studysync database.
-   - Created the empty `studysync` PostgreSQL database.
-   - Verified that Alok's initial migration (`20260925T1941_initial_study_sync`) is clean and ready to run with `prisma db migrate --show`.
-5. Tested running backend endpoints:
-   - `GET /api/health` -> verified HTTP 200 `{ success: true, message: 'StudySync API is running' }`.
-   - `GET /api/subjects` -> verified HTTP 200 returning in-memory seed subjects (`MATH101`, `PHY101`, `CS101`).
-   - `POST /api/subjects` -> verified HTTP 201 returning new in-memory subject.
-   - `GET /api/subjects/1` -> verified HTTP 200 returning single in-memory subject.
-   - `GET /api/health/database` -> verified HTTP 500 failure due to missing `DATABASE_URL` in `server/.env`.
-6. Inspected frontend structure on `origin/frontend-features`:
-   - React 19 + Vite 8 + React Router 7 + Lucide React.
-   - Verified that all pages (Dashboard, Subjects, Attendance, Assignments) render static mock arrays with no network communication or authentication.
-7. Authored comprehensive audit document in `docs/STATUS.md`.
+---
 
-### Verification Commands & Results
-- `git log --all --graph --oneline --decorate -30`: Confirmed complete history and branch topology.
-- `cd server; node -e "<probe>"`: Confirmed health and subject endpoints respond with expected JSON contract envelopes.
-- `cd server; npx.cmd prisma db migrate --show --db <DATABASE_URL>`: Confirmed `20260925T1941_initial_study_sync` is ready to apply cleanly.
+## Phase 1 — Foundation [COMPLETED]
+- Merged `origin/frontend-features` with `--no-ff` (27 files, 3,597 insertions).
+- Configured PostgreSQL connection in gitignored `server/.env` and updated `server/.env.example`.
+- Ran `prisma db migrate` to create all 8 tables in `studysync` database. Verified 1:1 match with `schema.prisma`.
+- Documented verified Prisma RC query patterns in `docs/PRISMA_NOTES.md`.
+- Implemented backend auth (`register`, `login`, `me`) with bcrypt and JWT.
+- Configured Helmet, CORS allow-listing, rate limiting, and centralized error handling.
+- Built frontend API client (`client/src/services/api.js`) with Bearer token injection.
+- Built `AuthContext`, `ToastContext`, and `useAttendanceThreshold` hook.
+- Built shared UI primitives: `Button`, `Card`, `Badge`, `Modal`, `EmptyState`, `SkeletonLoader`, `Toast`.
+- Built app shell: fixed sidebar (desktop), responsive drawer (mobile/tablet), sticky header with account menu and settings modal.
 
-### Broken / Untested Areas
-- `DATABASE_URL` is missing from `server/.env`.
-- Database has not yet had migrations applied (currently 0 tables).
-- No authentication routes or token protection exist on the backend.
-- Frontend has zero API client, zero authentication, and zero dynamic state.
-- Frontend files are currently on `origin/frontend-features` and await merge approval.
+---
 
-### Decisions Needed from User
-1. **Merge Approval:** Permission to merge `origin/frontend-features` into `finish/studysync`.
-2. **Database Migration Approval:** Permission to run `npx.cmd prisma db migrate --db <DATABASE_URL>` to apply Alok's initial migration.
-3. **Token Storage Choice:** Confirmation on storing access token in `localStorage` with `Authorization: Bearer <token>` to match `API_CONTRACT.md`.
+## Phase 2 — Feature Slices [COMPLETED]
+1. **Subjects Slice:**
+   - Real DB persistence via `db.orm.public.Subject`, scoped to `req.user.id`.
+   - Automatic attendance initialization on subject creation.
+   - Frontend Subjects page with Add Subject modal, delete confirmation, empty state.
+2. **Attendance Slice:**
+   - Formula: `(attended / total) * 100` (returns 0 if total is 0).
+   - Validation: rejects negative counts and `attended > total` at both API and UI level.
+   - Dynamic threshold advice ("safely miss X classes" / "need to attend next X classes").
+   - Quick logging buttons (+1 Attended, +1 Missed) and manual edit modal.
+3. **Assignments Slice:**
+   - Database persistence with `Temporal.Instant` timestamps in UTC.
+   - Search by title/subject and filter by status (All, Pending, Completed).
+   - Overdue and due-soon indicators based on current local time.
+   - Status toggle ("Mark Completed" / "Mark Pending") and delete with confirmation.
+4. **Timetable Slice:**
+   - Weekly grid on desktop (Monday to Saturday) and day-by-day tabs on mobile.
+   - Add class slot modal (subject, day, start/end time, room).
+5. **Dashboard Slice:**
+   - Aggregated real data API (`/api/dashboard/summary?threshold=...`).
+   - Summary cards: Active subjects, attendance %, pending/overdue assignments, today's schedule.
+   - Meaningful empty state with direct action when zero data exists.
+6. **Demo Seed Script:**
+   - Authored `server/src/scripts/seed.js` for optional dev demo seeding.
+
+---
+
+## Phase 3 — Hardening [COMPLETED]
+- Verified cross-user isolation: user A receives 403/404 for user B's resources.
+- Verified input validation across all endpoints.
+- Accessibility & WCAG AA contrast check: visible `:focus-visible` rings, semantic labels, ARIA dialog roles.
+- Responsive design verified across mobile (360px), tablet (768px), and desktop (1280px).
+- Zero console errors, zero dead code, production builds verified.
+
+---
+
+## Phase 4 — Deployment Prep & Testing [COMPLETED]
+- Updated `README.md` with setup guide, scripts, security decisions, and product rules.
+- Production build verified: `vite build` completed in 1.17s.
+- Test suites:
+  - Backend: 13 tests passed across 2 suites (`vitest`).
+  - Frontend: 3 tests passed across 1 suite (`vitest`).
+  - Total: 16 automated tests passing.
