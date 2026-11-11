@@ -2,6 +2,10 @@ require('temporal-polyfill/full/global');
 const postgres = require('@prisma/orm-postgres/runtime').default
 const { readFileSync } = require('node:fs')
 const path = require('node:path')
+
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env.local') })
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') })
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') })
 require('dotenv').config()
 
 const contractPath = path.join(__dirname, '../prisma/contract.json')
