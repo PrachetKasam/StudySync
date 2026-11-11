@@ -1,4 +1,5 @@
-const db = require('../db')
+const rawDb = require('../db')
+const db = rawDb.orm ? rawDb : (rawDb.default || rawDb.db || rawDb)
 const { hashPassword, comparePassword } = require('../utils/password')
 const { generateToken } = require('../utils/token')
 

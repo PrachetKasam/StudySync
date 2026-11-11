@@ -3,7 +3,8 @@ const helmet = require('helmet')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 
-const db = require('./db')
+const rawDb = require('./db')
+const db = rawDb.orm ? rawDb : (rawDb.default || rawDb.db || rawDb)
 const authRoutes = require('./routes/authRoutes')
 const subjectRoutes = require('./routes/subjectRoutes')
 const attendanceRoutes = require('./routes/attendanceRoutes')
@@ -53,7 +54,8 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/health/database', async (req, res) => {
   try {
-    await db.orm.public.User.first()
+    const activeDb = db.orm ? db : (db.default || db.db || db)
+    await activeDb.orm.public.User.first()
 
     res.json({
       success: true,
