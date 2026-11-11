@@ -14,6 +14,9 @@ const errorHandler = require('./middleware/errorHandler')
 
 const app = express()
 
+// Trust first proxy hop securely (e.g. Vercel)
+app.set('trust proxy', 1)
+
 // Security headers
 app.use(helmet())
 
@@ -50,12 +53,7 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/health/database', async (req, res) => {
   try {
-    const runtime = await db.runtime()
-    const plan = db.raw.sql`SELECT 1 AS healthy`
-      .returnsRow({ healthy: 'pg/int4@1' })
-      .build()
-
-    await runtime.query(plan)
+    await db.orm.public.User.first()
 
     res.json({
       success: true,
